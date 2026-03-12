@@ -1,42 +1,29 @@
 import cv2
-from detection.yolo_detector import YoloDetector
-from tracking.deep_sort_tracker import DeepSortTracker # Verifique se este nome bate com seu arquivo
-from analytics.people_counter import PeopleCounter
+from ultralytics import YOLO
 
-def rodar_loja():
-    cap = cv2.VideoCapture(0)
-    detector = YoloDetector()
-    tracker = DeepSortTracker()
-    counter = PeopleCounter(line_y=0.6) # Linha a 60% da altura da tela
+# 1. Carrega o modelo da YOLO
+model = YOLO('yolov8n.pt') 
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret: break
+# 2. Inicia a câmera
+cap = cv2.VideoCapture(0)
 
-        # 1. Detecção
-        detections = detector.detect_objects(frame)
-        
-        # 2. Tracking (Passa as detecções para o DeepSORT)
-        tracks = tracker.update(detections, frame)
+print("Pressione 'q' para fechar a janela.")
 
-        # 3. Contagem
-        counter.update(tracks, frame.shape[0])
-        
-        # 4. Visualização
-        for track in tracks:
-            if track.is_confirmed():
-                bbox = track.to_tlbr()
-                cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255,0,0), 2)
-                cv2.putText(frame, f"ID: {track.track_id}", (int(bbox[0]), int(bbox[1]-10)), 0, 0.6, (255,255,255), 2)
+while cap.isOpened():
+    success, frame = cap.read()
+    if success:
+        # 3. Detecta apenas PESSOAS (class 0)
+        results = model(frame, classes=[0], conf=0.5)
 
-        counter.draw_ui(frame)
-        cv2.imshow("FullStore AI - Analytics", frame)
+        # 4. Desenha as caixas na tela
+        annotated_frame = results[0].plot()
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        cv2.imshow("FullStore - Detector de Clientes", annotated_frame)
+
+        if cv2.waitKey(1) & 0xFF == ord("q"):
             break
+    else:
+        break
 
-    cap.release()
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    rodar_loja()
+cap.release()
+cv2.destroyAllWindows()
