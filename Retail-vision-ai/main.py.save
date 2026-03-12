@@ -1,0 +1,6 @@
+nano main.py
+print("Inicializando FullStore AI")
+
+from config.settings import *
+
+print("Configurações carregadas")

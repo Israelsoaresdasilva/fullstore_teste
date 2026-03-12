@@ -1,0 +1,13 @@
+from deep_sort_realtime.deepsort_tracker import DeepSort
+
+class Tracker:
+
+    def __init__(self):
+
+        self.tracker = DeepSort(max_age=30)
+
+    def update(self, detections):
+
+        tracks = self.tracker.update_tracks(detections)
+
+        return tracks

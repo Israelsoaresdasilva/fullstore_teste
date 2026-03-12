@@ -1,0 +1,9 @@
+
+import cv2
+
+def draw_box(frame, x1, y1, x2, y2):
+    cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0,255,0), 2)
+
+def draw_text(frame, text, x, y):
+    cv2.putText(frame, text, (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
+
